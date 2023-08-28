@@ -5,16 +5,22 @@ using UnityEngine;
 public class PhoneScript : MonoBehaviour
 {
     private int message = 0;
-    private bool isInPhone = false;
     [SerializeField] private float speed;
-    [SerializeField] private GameObject phoneObject, mainCamera;
+    [SerializeField] private Transform phoneObject, mainCamera;
+
+    private static bool isInPhone = false;
+    static public bool IsInPhone
+    {
+        get => isInPhone;
+        set { Debug.LogError("Can't because field's (IsInPhone) set is null"); }
+    }
 
     void Start()
     {
-        phoneObject.transform.GetChild(0).gameObject.SetActive(true);
-        for (int i = 1; i < phoneObject.transform.childCount; i++)
+        phoneObject.GetChild(0).gameObject.SetActive(true);
+        for (int i = 1; i < phoneObject.childCount; i++)
         {
-            phoneObject.transform.GetChild(i).gameObject.SetActive(false);
+            phoneObject.GetChild(i).gameObject.SetActive(false);
         }
     }
 
@@ -32,21 +38,22 @@ public class PhoneScript : MonoBehaviour
         if (isInPhone)
         {
             StopAllCoroutines();
-            StartCoroutine(RotatePhone(new Vector3(-55, 58, -34.5f), new Vector3(35, 150, 0)));
+            StartCoroutine(RotatePhone(new Vector3(-55, 58, -34.5f), new Vector3(35, -30, 0) + mainCamera.parent.rotation.eulerAngles));
+            Debug.Log(new Vector3(35, 150, 0) - mainCamera.parent.rotation.eulerAngles);
         }
         else
         {
             StopAllCoroutines();
-            StartCoroutine(RotatePhone(new Vector3(-90, 0, 0), new Vector3(0, 180, 0)));
+            StartCoroutine(RotatePhone(new Vector3(-90, 0, 0), mainCamera.parent.rotation.eulerAngles));
         }
 
     }
 
     public void ActionForMessages()
     {
-        phoneObject.transform.GetChild(message).gameObject.SetActive(false);
+        phoneObject.GetChild(message).gameObject.SetActive(false);
         message++;
-        phoneObject.transform.GetChild(message).gameObject.SetActive(true);
+        phoneObject.GetChild(message).gameObject.SetActive(true);
     }
 
     private IEnumerator RotatePhone(Vector3 angleOfHand, Vector3 angleOfCamera)
@@ -54,7 +61,7 @@ public class PhoneScript : MonoBehaviour
         var me = transform;
         var to = Quaternion.Euler(angleOfHand);
 
-        var meCam = mainCamera.transform;
+        var meCam = mainCamera;
         var toCam = Quaternion.Euler(angleOfCamera);
 
         while (true)
@@ -72,4 +79,35 @@ public class PhoneScript : MonoBehaviour
             yield return null;
         }
     }
+
+
+    //это все для того чтобы нормально вбивать в движке значения поворота
+    //private IEnumerator RotatePhone1(Vector3 angleOfHand, Vector3 angleOfCamera)
+    //{
+    //    var meHand = transform.rotation;
+    //    var toHand = Quaternion.Euler(angleOfHand);
+
+    //    var meCam = mainCamera.localRotation;
+    //    var toCam = Quaternion.Euler(angleOfCamera);
+
+    //    //meCam.rotation *= mainCamera.parent.rotation;
+    //    //toCam *= mainCamera.parent.rotation;
+
+    //    Debug.Log(meCam.eulerAngles);
+
+    //    while (true)
+    //    {
+    //        toCam = Quaternion.RotateTowards(meHand, toHand, speed * Time.deltaTime);
+    //        meCam = Quaternion.RotateTowards(meCam, toCam, 2 * speed * Time.deltaTime);
+
+    //        if (Quaternion.Angle(meHand, toHand) < 0.01f && Quaternion.Angle(meCam, toCam) < 0.01f)
+    //        {
+    //            meHand = toHand;
+    //            meCam = toCam;
+    //            yield break;
+    //        }
+
+    //        yield return null;
+    //    }
+    //}
 }
