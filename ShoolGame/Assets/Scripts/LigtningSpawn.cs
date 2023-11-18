@@ -6,6 +6,7 @@ public class LigtningSpawn : MonoBehaviour
 {
     public float range, spawnRate, lifeTime;
     private float startSpawnRate;
+    [SerializeField] bool isCarsSpawn;
 
     public GameObject ligtning, ligtning2;
 
@@ -19,14 +20,24 @@ public class LigtningSpawn : MonoBehaviour
     {
         if(spawnRate<= 0)
         {
-            if(Random.Range(1f, 2f) < 1.5f)
+            if (!isCarsSpawn)
             {
-                Destroy(Instantiate(ligtning, new Vector3(Random.RandomRange(-range, range) + transform.position.x, transform.position.y, Random.RandomRange(-range, range) + transform.position.z), GameObject.Find("Main Camera").transform.rotation), lifeTime);
+                if (Random.Range(1f, 2f) < 1.5f)
+                {
+                    Destroy(Instantiate(ligtning, new Vector3(Random.RandomRange(-range, range) + transform.position.x, transform.position.y, Random.RandomRange(-range, range) + transform.position.z), GameObject.Find("Main Camera").transform.rotation), lifeTime);
+                }
+                else
+                {
+                    Destroy(Instantiate(ligtning2, new Vector3(Random.RandomRange(-range, range) + transform.position.x, transform.position.y, Random.RandomRange(-range, range) + transform.position.z), GameObject.Find("Main Camera").transform.rotation), lifeTime);
+                }
             }
             else
             {
-                Destroy(Instantiate(ligtning2, new Vector3(Random.RandomRange(-range, range) + transform.position.x, transform.position.y, Random.RandomRange(-range, range) + transform.position.z), GameObject.Find("Main Camera").transform.rotation), lifeTime);
+                Destroy(Instantiate(ligtning, transform.position, Quaternion.identity), lifeTime);
+                ligtning.transform.GetChild(Random.RandomRange(1, 4)).gameObject.SetActive(true);
+
             }
+
             spawnRate = startSpawnRate;
         }
         else

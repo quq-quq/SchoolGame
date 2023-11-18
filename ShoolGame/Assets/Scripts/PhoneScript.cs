@@ -6,6 +6,7 @@ public class PhoneScript : MonoBehaviour
 {
     private int message = 0;
     [SerializeField] private float speed;
+    private Coroutine phoneCoroutine;
     [SerializeField] private Transform phoneObject, mainCamera;
 
     private static bool isInPhone = false;
@@ -26,27 +27,27 @@ public class PhoneScript : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             isInPhone = true;
         }
-        if(Input.GetKeyUp(KeyCode.E))
+        if(Input.GetKeyUp(KeyCode.Q))
         {
             isInPhone = false;
         }
 
         if (isInPhone)
         {
-            StopAllCoroutines();
-            StartCoroutine(RotatePhone(new Vector3(-55, 58, -34.5f), new Vector3(35, -30, 0) + mainCamera.parent.rotation.eulerAngles));
-            Debug.Log(new Vector3(35, 150, 0) - mainCamera.parent.rotation.eulerAngles);
+            if (phoneCoroutine != null)
+                StopCoroutine(phoneCoroutine);
+            phoneCoroutine = StartCoroutine(CheckPhone(new Vector3(-55, 58, -34.5f)));
         }
         else
         {
-            StopAllCoroutines();
-            StartCoroutine(RotatePhone(new Vector3(-90, 0, 0), mainCamera.parent.rotation.eulerAngles));
+            if (phoneCoroutine != null)
+                StopCoroutine(phoneCoroutine);
+            phoneCoroutine = StartCoroutine(CheckPhone(new Vector3(-70, 8, 0)));
         }
-
     }
 
     public void ActionForMessages()
@@ -56,58 +57,22 @@ public class PhoneScript : MonoBehaviour
         phoneObject.GetChild(message).gameObject.SetActive(true);
     }
 
-    private IEnumerator RotatePhone(Vector3 angleOfHand, Vector3 angleOfCamera)
+    private IEnumerator CheckPhone(Vector3 angleOfHand)
     {
         var me = transform;
         var to = Quaternion.Euler(angleOfHand);
 
-        var meCam = mainCamera;
-        var toCam = Quaternion.Euler(angleOfCamera);
-
         while (true)
         {
             me.rotation = Quaternion.RotateTowards(me.rotation, to, speed * Time.deltaTime);
-            meCam.rotation = Quaternion.RotateTowards(meCam.rotation, toCam, 2 *speed * Time.deltaTime);
 
-            if (Quaternion.Angle(me.rotation, to) < 0.01f && Quaternion.Angle(meCam.rotation, toCam) < 0.01f)
+            if (Quaternion.Angle(me.rotation, to) < 0.01f)
             {
                 me.rotation = to;
-                meCam.rotation = toCam;
                 yield break;
             }
 
             yield return null;
         }
     }
-
-
-    //это все для того чтобы нормально вбивать в движке значения поворота
-    //private IEnumerator RotatePhone1(Vector3 angleOfHand, Vector3 angleOfCamera)
-    //{
-    //    var meHand = transform.rotation;
-    //    var toHand = Quaternion.Euler(angleOfHand);
-
-    //    var meCam = mainCamera.localRotation;
-    //    var toCam = Quaternion.Euler(angleOfCamera);
-
-    //    //meCam.rotation *= mainCamera.parent.rotation;
-    //    //toCam *= mainCamera.parent.rotation;
-
-    //    Debug.Log(meCam.eulerAngles);
-
-    //    while (true)
-    //    {
-    //        toCam = Quaternion.RotateTowards(meHand, toHand, speed * Time.deltaTime);
-    //        meCam = Quaternion.RotateTowards(meCam, toCam, 2 * speed * Time.deltaTime);
-
-    //        if (Quaternion.Angle(meHand, toHand) < 0.01f && Quaternion.Angle(meCam, toCam) < 0.01f)
-    //        {
-    //            meHand = toHand;
-    //            meCam = toCam;
-    //            yield break;
-    //        }
-
-    //        yield return null;
-    //    }
-    //}
 }
